@@ -26,7 +26,7 @@ jobs:
       - name: Run unit and API tests
         env:
           PYTHONPATH: .
-        run: pytest
+        run: pytest -v tests
 
       - name: Run NEXA ENGINE simulation evaluation
         run: python -m backend.nexa_engine.evaluation
