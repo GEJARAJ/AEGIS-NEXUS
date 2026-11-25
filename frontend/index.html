@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AEGIS NEXUS — Civic Sentinel | District Civic Resilience Portal</title>
+  <title>AEGIS NEXUS — Cyber Resilience Sentinel | Critical Telecom &amp; Digital Infrastructure Defense</title>
   <link rel="stylesheet" href="/static/css/gov-theme.css" />
 </head>
 <body>
@@ -19,9 +19,9 @@
     <div class="container gov-notice-inner">
       <span class="badge badge-sim">SIMULATION-BASED PROTOTYPE</span>
       <span id="simulation-disclaimer">
-        All telemetry, cause probabilities, and citizen-impact ranges are synthetic and illustrative. Real deployment requires formal government authorization and a data-sharing agreement.
+        All telemetry, threat probabilities, and subscriber-impact ranges are synthetic and illustrative. Real deployment requires formal DoT / CERT-In authorization and a DPDP-compliant data-sharing agreement.
       </span>
-      <span class="badge badge-privacy">ZERO PII • AGGREGATE TELEMETRY ONLY</span>
+      <span class="badge badge-privacy">ZERO PII • DPDP-COMPLIANT AGGREGATE TELEMETRY ONLY</span>
     </div>
   </div>
 
@@ -38,23 +38,23 @@
           </svg>
         </div>
         <div>
-          <div class="portal-eyebrow">DISTRICT CIVIC RESILIENCE &amp; SERVICE CONTINUITY COMMAND</div>
-          <h1 class="portal-title">AEGIS NEXUS <span class="title-divider">|</span> <span class="title-sub">Civic Sentinel</span></h1>
-          <p class="portal-tagline">Protecting services. Preventing disruption. Prioritizing people. &bull; Powered by <strong>NEXA ENGINE</strong></p>
+          <div class="portal-eyebrow">CYBER RESILIENCE &amp; THREAT CONTAINMENT COMMAND &bull; CRITICAL TELECOM &amp; DIGITAL INFRASTRUCTURE</div>
+          <h1 class="portal-title">AEGIS NEXUS <span class="title-divider">|</span> <span class="title-sub">Cyber Resilience Sentinel (DoT / CERT-In Prototype)</span></h1>
+          <p class="portal-tagline">Detecting control-plane anomalies. Attributing cyber threats. Containing blast radius. &bull; Powered by <strong>NEXA ENGINE</strong></p>
         </div>
       </div>
 
       <div class="header-actions">
         <div class="district-meta">
-          <span class="meta-label">ACTIVE JURISDICTION</span>
-          <strong id="district-name">Model Civic District (Simulation Prototype)</strong>
+          <span class="meta-label">PROTECTED LSA SECTOR</span>
+          <strong id="district-name">Tamil Nadu &amp; Chennai LSA (Simulation Prototype)</strong>
         </div>
         <div class="demo-btn-group">
-          <button id="btn-run-demo" class="btn btn-primary" title="Run Section 12 scripted hospital registration failure scenario">
-            ▶ Run Hospital Failure Demo
+          <button id="btn-run-demo" class="btn btn-primary" title="Run scripted cyberattack &amp; signaling flood containment scenario">
+            ▶ Run Cyber Attack &amp; Signaling Flood Demo
           </button>
-          <button id="btn-step" class="btn btn-secondary" title="Advance simulation by 1 telemetry tick">+1 Tick</button>
-          <button id="btn-reset" class="btn btn-outline" title="Reset all institutions to normal baseline">Reset Baseline</button>
+          <button id="btn-step" class="btn btn-secondary" title="Advance telemetry simulation by 1 tick">+1 Tick</button>
+          <button id="btn-reset" class="btn btn-outline" title="Reset all 23 telecom &amp; edge nodes to baseline">Reset Baseline</button>
         </div>
       </div>
     </div>
@@ -62,10 +62,11 @@
     <!-- Navigation Tabs -->
     <nav class="portal-nav" aria-label="Primary sections">
       <div class="container nav-inner">
-        <button class="nav-tab active" data-tab="dashboard">District Resilience Dashboard</button>
-        <button class="nav-tab" data-tab="simulator">Fault Simulator &amp; Scope</button>
+        <button class="nav-tab active" data-tab="dashboard">Cyber Threat &amp; Containment Dashboard</button>
+        <button class="nav-tab" data-tab="simulator">Attack / Fault Simulator &amp; Scope</button>
+        <button class="nav-tab" data-tab="accessories">Resilience Accessories</button>
         <button class="nav-tab" data-tab="evaluation">Validation &amp; Benchmarks</button>
-        <button class="nav-tab" data-tab="governance">Privacy, Positioning &amp; Governance</button>
+        <button class="nav-tab" data-tab="governance">DPDP Privacy, CERT-In &amp; DoT Governance</button>
       </div>
     </nav>
   </header>
@@ -76,10 +77,10 @@
       <!-- KPI Tiles -->
       <div class="section-header-row">
         <div>
-          <h2>District Civic Resilience Overview <span class="illustrative-tag">(Illustrative Simulation Figures)</span></h2>
-          <p id="scope-note" class="muted-text">Core Scope (Hard-Frozen): 3 Government Hospitals + 20 Ration Distribution Centres (23 institutions).</p>
+          <h2>Cyber Resilience &amp; Threat Containment Overview <span class="illustrative-tag">(Tamil Nadu &amp; Chennai LSA • Illustrative)</span></h2>
+          <p id="scope-note" class="muted-text">Protected LSA Scope: 3 Core Gateway / Submarine CLS &amp; IXP Hubs (HOSP-*) + 20 District Backhaul / 5G Core &amp; BharatNet PoPs (PDS-*) (23 nodes).</p>
         </div>
-        <div class="filter-pills" role="group" aria-label="Filter institutions by alert level">
+        <div class="filter-pills" role="group" aria-label="Filter telecom nodes by threat level">
           <button class="pill active" data-filter="ALL">All (23)</button>
           <button class="pill" data-filter="Critical">Critical</button>
           <button class="pill" data-filter="Warning">Warning</button>
@@ -89,47 +90,47 @@
 
       <div class="kpi-grid">
         <article class="kpi-card kpi-critical">
-          <div class="kpi-label">Critical Alerts <span class="kpi-tag">Illustrative</span></div>
+          <div class="kpi-label">Critical Threat Alerts <span class="kpi-tag">Containment</span></div>
           <div class="kpi-value" id="kpi-critical">00</div>
-          <div class="kpi-sub">Immediate offline-continuity recommended</div>
+          <div class="kpi-sub">Immediate isolation, rate-limiting &amp; failover</div>
         </article>
         <article class="kpi-card kpi-warning">
-          <div class="kpi-label">Services at Risk <span class="kpi-tag">Illustrative</span></div>
+          <div class="kpi-label">Nodes Under Threat / Drift <span class="kpi-tag">Illustrative</span></div>
           <div class="kpi-value" id="kpi-risk">00</div>
-          <div class="kpi-sub">Critical + Warning institutions flagged</div>
+          <div class="kpi-sub">Core Gateways + 5G/BharatNet PoPs flagged</div>
         </article>
         <article class="kpi-card kpi-monitored">
-          <div class="kpi-label">Institutions Monitored <span class="kpi-tag">Core Scope</span></div>
+          <div class="kpi-label">Protected Telecom Assets <span class="kpi-tag">LSA Scope</span></div>
           <div class="kpi-value" id="kpi-monitored">23</div>
-          <div class="kpi-sub">3 Hospitals &bull; 20 Ration Centres</div>
+          <div class="kpi-sub">3 Core/IXP Gateways &bull; 20 5G/BharatNet PoPs</div>
         </article>
         <article class="kpi-card kpi-investigated">
-          <div class="kpi-label">Incidents Tracked <span class="kpi-tag">Workflow</span></div>
+          <div class="kpi-label">Incidents Contained <span class="kpi-tag">SOC / TERM</span></div>
           <div class="kpi-value" id="kpi-investigated">00</div>
           <div class="kpi-sub">Acknowledged / Mitigating / Restored</div>
         </article>
       </div>
 
-      <!-- Main Split Workspace: Ranked Institution Queue + Per-Alert Inspector -->
+      <!-- Main Split Workspace: Ranked Node Queue + Per-Alert Inspector -->
       <div class="workspace-grid">
         <div class="panel">
           <div class="panel-header">
-            <h3>Impact-Ranked Institution Queue <span class="illustrative-tag">("Which One First?")</span></h3>
-            <span class="panel-meta">Sorted by Severity Tier &amp; Citizen Impact Score</span>
+            <h3>Threat- &amp; Impact-Ranked Asset Queue <span class="illustrative-tag">("Which Asset to Defend First?")</span></h3>
+            <span class="panel-meta">Sorted by Threat Severity &amp; Subscriber/Service Blast Radius</span>
           </div>
           <div class="table-wrap">
             <table class="gov-table">
               <thead>
                 <tr>
                   <th>Rank</th>
-                  <th>Level</th>
-                  <th>Institution</th>
-                  <th>Impact Range (Illustrative)</th>
-                  <th>Workflow</th>
+                  <th>Threat Level</th>
+                  <th>Protected Telecom Asset</th>
+                  <th>Estimated Subscribers &amp; Critical Services at Risk</th>
+                  <th>Containment</th>
                 </tr>
               </thead>
               <tbody id="alert-table-body">
-                <tr><td colspan="5" class="muted-text">Loading district telemetry...</td></tr>
+                <tr><td colspan="5" class="muted-text">Loading LSA security telemetry...</td></tr>
               </tbody>
             </table>
           </div>
@@ -138,11 +139,11 @@
         <!-- Right Column: Selected Alert Inspector -->
         <div class="panel inspector-panel" id="alert-inspector">
           <div class="panel-header">
-            <h3>Alert Intelligence &amp; Action Panel</h3>
+            <h3>Threat Attribution, Blast Radius &amp; Containment Panel</h3>
             <span id="inspector-badge" class="level-badge level-Normal">Normal</span>
           </div>
           <div id="inspector-content" class="inspector-body">
-            <p class="muted-text">Select any institution row to inspect DriftSentinel signals, cause probabilities, citizen-impact assumptions, and offline-continuity actions.</p>
+            <p class="muted-text">Select any Core Gateway or 5G/BharatNet PoP row to inspect DriftSentinel attack anomalies, probabilistic threat attribution, protected service dependencies (UPI, Emergency 112, e-Hospital), and cyber containment playbooks.</p>
           </div>
         </div>
       </div>
@@ -160,17 +161,17 @@
             <p class="muted-text">Inject labeled operational faults into any core institution to test DriftSentinel, Cause Classifier, Citizen Impact Engine, and Offline Playbooks.</p>
             <form id="inject-form" class="gov-form">
               <label>
-                Target Institution (Core District)
+                Target Telecom Node (Tamil Nadu &amp; Chennai LSA)
                 <select id="inject-institution" required></select>
               </label>
               <label>
                 Fault Scenario to Inject
                 <select id="inject-fault" required>
-                  <option value="request_spike">DDoS-like Request Spike (Cyberattack-like / Surge)</option>
-                  <option value="auth_failure_storm">Authentication Failure Storm (Biometric / Portal)</option>
-                  <option value="link_drop">Link Drop &amp; Connectivity Deterioration</option>
-                  <option value="server_crash">Server Crash / Application Outage</option>
-                  <option value="sustained_overload">Sustained Peak-Hour Overload</option>
+                  <option value="request_spike">DDoS / Core Gateway Signaling Flood</option>
+                  <option value="auth_failure_storm">5G Core / AAA Authentication Storm</option>
+                  <option value="link_drop">Submarine Cable / Fiber Backhaul Cut</option>
+                  <option value="server_crash">Core Router / MPLS Node Crash</option>
+                  <option value="sustained_overload">Sustained Peak-Hour Backhaul Overload</option>
                   <option value="none">Clear Fault (Return to Normal Baseline)</option>
                 </select>
               </label>
@@ -187,13 +188,13 @@
 
         <div class="panel">
           <div class="panel-header">
-            <h3>Scope Discipline: Core vs. Extension Roadmap</h3>
-            <span class="panel-meta">Hard-Frozen Core</span>
+            <h3>LSA Scope Discipline: Core vs. Extension Roadmap</h3>
+            <span class="panel-meta">23-Node Frozen Prototype</span>
           </div>
           <div class="panel-body">
             <div class="scope-box scope-core">
-              <strong>Committed Core Scope (Active Now):</strong>
-              <p>1 Simulated District &bull; 3 Government Hospitals (Patient Registration) &bull; 20 Ration Distribution Centres (Biometric PDS).</p>
+              <strong>Committed LSA Prototype Scope (Active Now):</strong>
+              <p>1 Simulated LSA (Tamil Nadu &amp; Chennai) &bull; 3 Core Gateway / Submarine CLS &amp; IXP Hubs (<code>HOSP-*</code>) &bull; 20 District Backhaul / 5G Core &amp; BharatNet PoPs (<code>PDS-*</code>).</p>
             </div>
             <h4 class="sub-heading">Extension &amp; Future Scope (Excluded from Core)</h4>
             <div id="extension-sectors-list" class="extension-list"></div>
@@ -202,7 +203,129 @@
       </div>
     </section>
 
-    <!-- TAB 3: EVALUATION & BENCHMARKS -->
+    <!-- TAB 3: RESILIENCE ACCESSORIES -->
+    <section id="tab-accessories" class="tab-panel">
+      <div class="callout-warning">
+        <strong>Modular Cyber-Resilience Accessories (Simulation Only):</strong> Launch deterministic, multi-target, time-bounded (<code>duration_ticks</code>) cyber-defense drills—including the <strong>Signaling / Control-Plane Flood + Backhaul Degradation</strong> campaign—with labeled ground-truth attribution metadata.
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Coordinated Cyber-Resilience &amp; Threat Presets</h3>
+            <span class="badge badge-sim">Deterministic • Ground-Truth</span>
+          </div>
+          <div class="panel-body">
+            <p class="muted-text">Pre-configured multi-node attack &amp; resilience drills (control-plane floods, AAA signaling storms, backhaul degradation) with deterministic seeds and expected attribution labels.</p>
+            <div id="accessory-presets-list" class="preset-list">
+              <p class="muted-text">Loading coordinated presets...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Multi-Node &amp; Timed Campaign Builder</h3>
+            <span class="panel-meta">Synthetic Fault-Injector Accessory</span>
+          </div>
+          <div class="panel-body">
+            <form id="campaign-form" class="gov-form">
+              <label>
+                Campaign Name
+                <input type="text" id="camp-name" placeholder="e.g., Chennai CLS &amp; BharatNet Failover Drill" />
+              </label>
+
+              <div>
+                <div class="target-toolbar">
+                  <span class="target-label">Target Telecom Nodes (Select 1 or more)</span>
+                  <div class="target-quick-btns">
+                    <button type="button" class="pill" id="btn-sel-hospitals">3 Core/CLS Hubs</button>
+                    <button type="button" class="pill" id="btn-sel-pds">3 BharatNet PoPs</button>
+                    <button type="button" class="pill" id="btn-sel-none">Clear</button>
+                  </div>
+                </div>
+                <div id="camp-targets-grid" class="target-check-grid"></div>
+              </div>
+
+              <div class="grid-2">
+                <label>
+                  Fault Scenario
+                  <select id="camp-fault" required>
+                    <option value="request_spike">DDoS-like Request Spike</option>
+                    <option value="auth_failure_storm">Auth Failure Storm</option>
+                    <option value="link_drop">Link Drop &amp; Connectivity</option>
+                    <option value="server_crash">Server Crash / Outage</option>
+                    <option value="sustained_overload">Sustained Overload</option>
+                  </select>
+                </label>
+                <label>
+                  Duration (Ticks)
+                  <input type="number" id="camp-duration" min="1" max="50" value="4" required />
+                </label>
+              </div>
+
+              <div class="grid-2">
+                <label>
+                  Fault Intensity (<span id="camp-intensity-val">1.1</span>x)
+                  <input type="range" id="camp-intensity" min="0.5" max="1.8" step="0.1" value="1.1" />
+                </label>
+                <label>
+                  Deterministic Seed
+                  <input type="number" id="camp-seed" min="0" max="2147483647" value="42" required />
+                </label>
+              </div>
+
+              <label class="checkbox-inline">
+                <input type="checkbox" id="camp-reset-seed" />
+                <span>Reset simulator to deterministic seed before launch</span>
+              </label>
+
+              <div class="workflow-row">
+                <button type="submit" class="btn btn-primary">Launch Timed Campaign</button>
+                <button type="button" id="btn-clear-accessory" class="btn btn-dark">Clear Accessory Faults</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-16">
+        <div class="panel-header">
+          <h3>Active Timed Injections &amp; Ground-Truth Ledger</h3>
+          <div class="ledger-meta">
+            <span class="inst-id">Current Tick: <strong id="acc-current-tick">--</strong></span>
+            <span id="acc-status-badge" class="level-badge level-Normal">Idle</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="table-wrap">
+            <table class="gov-table">
+              <thead>
+                <tr>
+                  <th>Campaign</th>
+                  <th>Institution</th>
+                  <th>Fault Type</th>
+                  <th>Ground-Truth Cause</th>
+                  <th>Window (Ticks)</th>
+                  <th>Remaining</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody id="acc-active-body">
+                <tr><td colspan="7" class="muted-text">No timed accessory injections active.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 class="sub-heading mt-16">Recent Campaign Ground-Truth Audit Trail</h4>
+          <div id="acc-history-list" class="extension-list">
+            <p class="muted-text">No accessory campaigns launched yet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: EVALUATION & BENCHMARKS -->
     <section id="tab-evaluation" class="tab-panel">
       <div class="panel">
         <div class="panel-header">
@@ -250,8 +373,8 @@
 
   <footer class="portal-footer">
     <div class="container footer-inner">
-      <span><strong>AEGIS NEXUS</strong> &bull; Civic Sentinel (NEXA ENGINE) &bull; Simulation-Based Research &amp; Demonstration Prototype</span>
-      <span>Human-in-the-Loop Decision Support &bull; Deployment subject to Government Authorization</span>
+      <span><strong>AEGIS NEXUS</strong> &bull; Telecom Sentinel (DoT / TERM Cell Prototype • NEXA ENGINE) &bull; Simulation-Based Prototype</span>
+      <span>DPDP Act 2023 Aligned (Zero PII) &bull; Human-in-the-Loop LSA Command &bull; Deployment subject to DoT Authorization</span>
     </div>
   </footer>
 

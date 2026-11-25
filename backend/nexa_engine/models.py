@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ServiceType(str, Enum):
@@ -39,6 +39,12 @@ class WorkflowStatus(str, Enum):
     RESTORED = "Restored"
 
 
+class HeartbeatStatus(str, Enum):
+    HEALTHY = "healthy"
+    STALE = "stale"
+    MISSING = "missing"
+
+
 class InstitutionProfile(BaseModel):
     institution_id: str
     name: str
@@ -59,6 +65,8 @@ class InstitutionProfile(BaseModel):
 class TelemetryPoint(BaseModel):
     """Authorized, privacy-preserving aggregate operational telemetry (no PII)."""
 
+    model_config = ConfigDict(extra="forbid")
+
     institution_id: str
     tick: int
     timestamp: str
@@ -68,6 +76,15 @@ class TelemetryPoint(BaseModel):
     auth_failure_count: int = Field(..., ge=0)
     queue_length: int = Field(..., ge=0)
     injected_fault: FaultType = FaultType.NONE
+
+
+class TelemetryIngestBatch(BaseModel):
+    """Strict zero-PII external telemetry ingestion schema."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: str = Field(default="live_collector", min_length=1, max_length=64)
+    points: List[TelemetryPoint] = Field(..., min_length=1)
 
 
 class SignalContribution(BaseModel):
@@ -86,6 +103,10 @@ class DriftResult(BaseModel):
     isolation_score: float
     top_contributing_signals: List[SignalContribution]
     summary: str
+    heartbeat_status: HeartbeatStatus = HeartbeatStatus.HEALTHY
+    is_stale: bool = False
+    missed_ticks: int = 0
+    staleness_seconds: float = 0.0
 
 
 class CauseProbabilities(BaseModel):
@@ -121,6 +142,9 @@ class AlertWorkflowState(BaseModel):
     acknowledged_by: Optional[str] = None
     updated_at: Optional[str] = None
     notes: Optional[str] = None
+    cooldown_active: bool = False
+    suppressed_duplicates: int = 0
+    last_dispatch_reason: Optional[str] = None
 
 
 class CivicAlert(BaseModel):
