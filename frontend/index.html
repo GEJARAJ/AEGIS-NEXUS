@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AEGIS NEXUS — Civic Sentinel | District Civic Resilience Portal</title>
+  <link rel="stylesheet" href="/static/css/gov-theme.css" />
+</head>
+<body>
+  <!-- Sovereign Tricolor Top Strip -->
+  <div class="tricolor-strip" aria-hidden="true">
+    <span class="tri-saffron"></span>
+    <span class="tri-white"></span>
+    <span class="tri-green"></span>
+  </div>
+
+  <!-- Official Governance Notice Banner -->
+  <div class="gov-notice-bar" role="region" aria-label="Simulation and Governance Notice">
+    <div class="container gov-notice-inner">
+      <span class="badge badge-sim">SIMULATION-BASED PROTOTYPE</span>
+      <span id="simulation-disclaimer">
+        All telemetry, cause probabilities, and citizen-impact ranges are synthetic and illustrative. Real deployment requires formal government authorization and a data-sharing agreement.
+      </span>
+      <span class="badge badge-privacy">ZERO PII • AGGREGATE TELEMETRY ONLY</span>
+    </div>
+  </div>
+
+  <!-- Government Portal Header -->
+  <header class="portal-header">
+    <div class="container header-inner">
+      <div class="brand-block">
+        <div class="gov-emblem" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="44" height="44" fill="none">
+            <path d="M24 3L41 10V23C41 33.5 33.6 42.2 24 45C14.4 42.2 7 33.5 7 23V10L24 3Z" fill="#0B2545" stroke="#D97706" stroke-width="2.2"/>
+            <circle cx="24" cy="23" r="8.5" stroke="#FFFFFF" stroke-width="1.6"/>
+            <circle cx="24" cy="23" r="2.2" fill="#D97706"/>
+            <path d="M24 14.5V31.5M15.5 23H32.5M18 17L30 29M30 17L18 29" stroke="#FFFFFF" stroke-width="1.1" opacity="0.8"/>
+          </svg>
+        </div>
+        <div>
+          <div class="portal-eyebrow">DISTRICT CIVIC RESILIENCE &amp; SERVICE CONTINUITY COMMAND</div>
+          <h1 class="portal-title">AEGIS NEXUS <span class="title-divider">|</span> <span class="title-sub">Civic Sentinel</span></h1>
+          <p class="portal-tagline">Protecting services. Preventing disruption. Prioritizing people. &bull; Powered by <strong>NEXA ENGINE</strong></p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="district-meta">
+          <span class="meta-label">ACTIVE JURISDICTION</span>
+          <strong id="district-name">Model Civic District (Simulation Prototype)</strong>
+        </div>
+        <div class="demo-btn-group">
+          <button id="btn-run-demo" class="btn btn-primary" title="Run Section 12 scripted hospital registration failure scenario">
+            ▶ Run Hospital Failure Demo
+          </button>
+          <button id="btn-step" class="btn btn-secondary" title="Advance simulation by 1 telemetry tick">+1 Tick</button>
+          <button id="btn-reset" class="btn btn-outline" title="Reset all institutions to normal baseline">Reset Baseline</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="portal-nav" aria-label="Primary sections">
+      <div class="container nav-inner">
+        <button class="nav-tab active" data-tab="dashboard">District Resilience Dashboard</button>
+        <button class="nav-tab" data-tab="simulator">Fault Simulator &amp; Scope</button>
+        <button class="nav-tab" data-tab="evaluation">Validation &amp; Benchmarks</button>
+        <button class="nav-tab" data-tab="governance">Privacy, Positioning &amp; Governance</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container main-content">
+    <!-- TAB 1: DASHBOARD -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <!-- KPI Tiles -->
+      <div class="section-header-row">
+        <div>
+          <h2>District Civic Resilience Overview <span class="illustrative-tag">(Illustrative Simulation Figures)</span></h2>
+          <p id="scope-note" class="muted-text">Core Scope (Hard-Frozen): 3 Government Hospitals + 20 Ration Distribution Centres (23 institutions).</p>
+        </div>
+        <div class="filter-pills" role="group" aria-label="Filter institutions by alert level">
+          <button class="pill active" data-filter="ALL">All (23)</button>
+          <button class="pill" data-filter="Critical">Critical</button>
+          <button class="pill" data-filter="Warning">Warning</button>
+          <button class="pill" data-filter="Normal">Normal</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <article class="kpi-card kpi-critical">
+          <div class="kpi-label">Critical Alerts <span class="kpi-tag">Illustrative</span></div>
+          <div class="kpi-value" id="kpi-critical">00</div>
+          <div class="kpi-sub">Immediate offline-continuity recommended</div>
+        </article>
+        <article class="kpi-card kpi-warning">
+          <div class="kpi-label">Services at Risk <span class="kpi-tag">Illustrative</span></div>
+          <div class="kpi-value" id="kpi-risk">00</div>
+          <div class="kpi-sub">Critical + Warning institutions flagged</div>
+        </article>
+        <article class="kpi-card kpi-monitored">
+          <div class="kpi-label">Institutions Monitored <span class="kpi-tag">Core Scope</span></div>
+          <div class="kpi-value" id="kpi-monitored">23</div>
+          <div class="kpi-sub">3 Hospitals &bull; 20 Ration Centres</div>
+        </article>
+        <article class="kpi-card kpi-investigated">
+          <div class="kpi-label">Incidents Tracked <span class="kpi-tag">Workflow</span></div>
+          <div class="kpi-value" id="kpi-investigated">00</div>
+          <div class="kpi-sub">Acknowledged / Mitigating / Restored</div>
+        </article>
+      </div>
+
+      <!-- Main Split Workspace: Ranked Institution Queue + Per-Alert Inspector -->
+      <div class="workspace-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Impact-Ranked Institution Queue <span class="illustrative-tag">("Which One First?")</span></h3>
+            <span class="panel-meta">Sorted by Severity Tier &amp; Citizen Impact Score</span>
+          </div>
+          <div class="table-wrap">
+            <table class="gov-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Level</th>
+                  <th>Institution</th>
+                  <th>Impact Range (Illustrative)</th>
+                  <th>Workflow</th>
+                </tr>
+              </thead>
+              <tbody id="alert-table-body">
+                <tr><td colspan="5" class="muted-text">Loading district telemetry...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right Column: Selected Alert Inspector -->
+        <div class="panel inspector-panel" id="alert-inspector">
+          <div class="panel-header">
+            <h3>Alert Intelligence &amp; Action Panel</h3>
+            <span id="inspector-badge" class="level-badge level-Normal">Normal</span>
+          </div>
+          <div id="inspector-content" class="inspector-body">
+            <p class="muted-text">Select any institution row to inspect DriftSentinel signals, cause probabilities, citizen-impact assumptions, and offline-continuity actions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: FAULT SIMULATOR & SCOPE -->
+    <section id="tab-simulator" class="tab-panel">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Controlled Fault Injection (Simulator)</h3>
+            <span class="badge badge-sim">Simulation Only</span>
+          </div>
+          <div class="panel-body">
+            <p class="muted-text">Inject labeled operational faults into any core institution to test DriftSentinel, Cause Classifier, Citizen Impact Engine, and Offline Playbooks.</p>
+            <form id="inject-form" class="gov-form">
+              <label>
+                Target Institution (Core District)
+                <select id="inject-institution" required></select>
+              </label>
+              <label>
+                Fault Scenario to Inject
+                <select id="inject-fault" required>
+                  <option value="request_spike">DDoS-like Request Spike (Cyberattack-like / Surge)</option>
+                  <option value="auth_failure_storm">Authentication Failure Storm (Biometric / Portal)</option>
+                  <option value="link_drop">Link Drop &amp; Connectivity Deterioration</option>
+                  <option value="server_crash">Server Crash / Application Outage</option>
+                  <option value="sustained_overload">Sustained Peak-Hour Overload</option>
+                  <option value="none">Clear Fault (Return to Normal Baseline)</option>
+                </select>
+              </label>
+              <label>
+                Fault Intensity (<span id="intensity-val">1.0</span>x)
+                <input type="range" id="inject-intensity" min="0.5" max="1.8" step="0.1" value="1.0" />
+              </label>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Inject Fault &amp; Evaluate Pipeline</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Scope Discipline: Core vs. Extension Roadmap</h3>
+            <span class="panel-meta">Hard-Frozen Core</span>
+          </div>
+          <div class="panel-body">
+            <div class="scope-box scope-core">
+              <strong>Committed Core Scope (Active Now):</strong>
+              <p>1 Simulated District &bull; 3 Government Hospitals (Patient Registration) &bull; 20 Ration Distribution Centres (Biometric PDS).</p>
+            </div>
+            <h4 class="sub-heading">Extension &amp; Future Scope (Excluded from Core)</h4>
+            <div id="extension-sectors-list" class="extension-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: EVALUATION & BENCHMARKS -->
+    <section id="tab-evaluation" class="tab-panel">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Simulation-Based Validation &amp; Honest Benchmarks</h3>
+          <button id="btn-refresh-eval" class="btn btn-secondary">Run Benchmark Suite</button>
+        </div>
+        <div class="panel-body">
+          <div class="callout-warning">
+            <strong>Honest Reporting Rule:</strong> All metrics below are generated from deterministic, fixed-seed simulations with shifted parameters and held-out fault types. They validate prototype behavior and must not be cited as real-world deployment accuracy.
+          </div>
+          <div id="eval-results" class="eval-grid">
+            <p class="muted-text">Loading evaluation benchmark...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PRIVACY, POSITIONING & GOVERNANCE -->
+    <section id="tab-governance" class="tab-panel">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>National Cyber Ecosystem Positioning</h3>
+            <span class="panel-meta">Complementary Layer</span>
+          </div>
+          <div class="panel-body" id="gov-positioning"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Privacy, Ethics &amp; Authorization Guardrails</h3>
+            <span class="badge badge-privacy">Zero PII</span>
+          </div>
+          <div class="panel-body" id="gov-privacy"></div>
+        </div>
+      </div>
+      <div class="panel mt-16">
+        <div class="panel-header">
+          <h3>Communication &amp; Claims Guardrails ("Say This, Not That")</h3>
+          <span class="panel-meta">Credibility Standard</span>
+        </div>
+        <div class="panel-body" id="gov-claims"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="portal-footer">
+    <div class="container footer-inner">
+      <span><strong>AEGIS NEXUS</strong> &bull; Civic Sentinel (NEXA ENGINE) &bull; Simulation-Based Research &amp; Demonstration Prototype</span>
+      <span>Human-in-the-Loop Decision Support &bull; Deployment subject to Government Authorization</span>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
