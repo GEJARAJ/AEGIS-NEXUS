@@ -25,8 +25,10 @@ jobs:
 
       - name: Run unit and API tests
         env:
-          PYTHONPATH: .
-        run: pytest -v tests
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m pytest -v
 
       - name: Run NEXA ENGINE simulation evaluation
+        env:
+          PYTHONPATH: ${{ github.workspace }}
         run: python -m backend.nexa_engine.evaluation
