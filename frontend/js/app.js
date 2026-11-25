@@ -1,4 +1,4 @@
-/* AEGIS NEXUS — Civic Sentinel Government Command Portal Controller */
+/* AEGIS NEXUS — Cyber Resilience Sentinel (DoT / CERT-In Prototype) Portal Controller */
 
 const state = {
   dashboard: null,
@@ -8,11 +8,104 @@ const state = {
 };
 
 const CAUSE_LABELS = {
-  cyberattack_like: "Cyberattack-like pattern",
-  overload: "System / Civic Overload",
-  connectivity_failure: "Connectivity / Link Failure",
-  hardware_or_human_error: "Hardware / Human Error",
+  cyberattack_like: "Cyberattack / Control-Plane Signaling Flood",
+  overload: "Traffic Saturation / DDoS-Induced Overload",
+  connectivity_failure: "Backhaul / Subsea Link Degradation",
+  hardware_or_human_error: "Core Hardware / Misconfiguration Fault",
 };
+
+const TELECOM_NODE_CATALOG = {
+  "HOSP-01": {
+    name: "Chennai Submarine Cable Landing Station (CLS) & NIXI IXP Hub",
+    tier: "Core / CLS Hub",
+    tierClass: "tier-core",
+    dept: "DoT Chennai LSA / NIXI Core Switching & Subsea Ops",
+    alternate: "ECR Redundant CLS Optical Ring & Bengaluru IXP Transit",
+    services: ["UPI / NPCI Core", "Emergency 112", "e-Hospital Backbone"],
+  },
+  "HOSP-02": {
+    name: "Coimbatore Regional Core Gateway & MPLS Transit Hub",
+    tier: "Core / CLS Hub",
+    tierClass: "tier-core",
+    dept: "DoT Tamil Nadu LSA / Western Optical Core NOC",
+    alternate: "Salem-Madurai Redundant DWDM Optical Ring",
+    services: ["UPI / Payments", "Emergency 112", "e-Hospital Connectivity"],
+  },
+  "HOSP-03": {
+    name: "Madurai Southern Gateway & Emergency 112 Switching Hub",
+    tier: "Core / CLS Hub",
+    tierClass: "tier-core",
+    dept: "DoT Tamil Nadu LSA / Critical Emergency Routing Cell",
+    alternate: "Trichy Core Failover Switch & Satellite VSAT Backhaul",
+    services: ["Emergency 112 Routing", "e-Hospital Connectivity", "UPI / Payments"],
+  },
+  "PDS-01": { name: "BharatNet PoP-01 Kaveri Delta (Thanjavur Rural Ring)" },
+  "PDS-02": { name: "BharatNet PoP-02 Palayam GPON Aggregation Node" },
+  "PDS-03": { name: "5G Core & BharatNet PoP-03 Melur Block BTS Cluster" },
+  "PDS-04": { name: "BharatNet PoP-04 Vallam Rural Fiber Relay" },
+  "PDS-05": { name: "BharatNet PoP-05 Thiruvaiyaru Grama OLT Node" },
+  "PDS-06": { name: "BharatNet PoP-06 Orathanadu East Backhaul Hub" },
+  "PDS-07": { name: "BharatNet PoP-07 Sengipatti Rural 4G/5G Tower Ring" },
+  "PDS-08": { name: "5G Edge & Backhaul PoP-08 Budalur Junction" },
+  "PDS-09": { name: "5G Edge & Backhaul PoP-09 Peravurani Market Node" },
+  "PDS-10": { name: "District Backhaul & 5G PoP-10 Pattukkottai West" },
+  "PDS-11": { name: "Coastal Backhaul & BharatNet PoP-11 Adirampattinam" },
+  "PDS-12": { name: "BharatNet PoP-12 Madukkur Grama Fiber Access Node" },
+  "PDS-13": { name: "5G Core & Backhaul PoP-13 Nanjikottai Ward-4" },
+  "PDS-14": { name: "BharatNet PoP-14 Gandarvakottai Border BTS Relay" },
+  "PDS-15": { name: "5G Edge & Backhaul PoP-15 Ammapettai Access Ring" },
+  "PDS-16": { name: "District Backhaul & 5G PoP-16 Papanasam Town" },
+  "PDS-17": { name: "5G Core UPF & Metro Fiber PoP-17 Kumbakonam South" },
+  "PDS-18": { name: "5G Core & e-Hospital Link PoP-18 Medical College Road" },
+  "PDS-19": { name: "Metro Backhaul & 5G PoP-19 Railway Colony" },
+  "PDS-20": { name: "Chennai Central 5G Core UPF & Metro Fiber PoP-20" },
+};
+
+function getTelecomNodeView(inst) {
+  const entry = TELECOM_NODE_CATALOG[inst.institution_id] || {};
+  const isCore = inst.service_type === "hospital_registration";
+  return {
+    name: entry.name || inst.name,
+    tier: entry.tier || (isCore ? "Core / CLS Hub" : "5G / BharatNet PoP"),
+    tierClass: entry.tierClass || (isCore ? "tier-core" : "tier-pop"),
+    dept: entry.dept || (isCore ? "DoT Chennai LSA / Core Optical NOC" : "DoT Tamil Nadu LSA / BharatNet & TSP Access Ops"),
+    alternate: entry.alternate || (isCore ? "Redundant DWDM Optical Ring" : "Intra-Circle Roaming (ICR) Partner BTS & Redundant BharatNet Ring"),
+    services: entry.services || ["UPI / Payments", "Emergency 112 Routing", "e-Hospital Connectivity"],
+  };
+}
+
+function getTelecomPlaybookView(alert) {
+  if (!alert.playbook) return null;
+  const inst = alert.institution;
+  const node = getTelecomNodeView(inst);
+  const isCore = inst.service_type === "hospital_registration";
+  if (isCore) {
+    return {
+      title: "Core Gateway Cyber Containment & Traffic Isolation Playbook",
+      triggered: alert.playbook.triggered,
+      department: node.dept,
+      alternate: node.alternate,
+      steps: [
+        "Isolate anomalous signaling/request flood signatures and enforce edge BGP/WAF rate-limiting on the gateway.",
+        "Apply zero-trust ACLs and QoS allow-listing to protect UPI/NPCI settlement, Emergency 112 routing, and e-Hospital links.",
+        `Failover clean transit sessions onto redundant DWDM optical ring (${node.alternate}).`,
+        "Escalate zero-PII indicators of compromise (IOCs) and telemetry to CERT-In, NCIIPC, and DoT Security Wing (TERM Cell).",
+      ],
+    };
+  }
+  return {
+    title: "5G Core / BharatNet Threat Containment & Link Failover Playbook",
+    triggered: alert.playbook.triggered,
+    department: node.dept,
+    alternate: node.alternate,
+    steps: [
+      "Quarantine anomalous AAA / Diameter / 5G NAS authentication bursts and apply per-node signaling rate caps.",
+      "Activate Intra-Circle Roaming (ICR) and redundant BharatNet optical ring failover to preserve 112 & UPI connectivity.",
+      `Shift clean subscriber sessions to ${node.alternate}.`,
+      "Dispatch zero-PII security telemetry to CERT-In, DoT Security Wing / TERM Cell, and State Cyber SOC.",
+    ],
+  };
+}
 
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, {
@@ -38,11 +131,13 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-function renderDashboard(data) {
+function renderDashboard(data, options = {}) {
   state.dashboard = data;
-  document.getElementById("district-name").textContent = data.district_name;
-  document.getElementById("scope-note").textContent = data.scope_note;
-  document.getElementById("simulation-disclaimer").textContent = data.simulation_disclaimer;
+  document.getElementById("district-name").textContent = "Tamil Nadu & Chennai LSA (Simulation Prototype)";
+  document.getElementById("scope-note").textContent =
+    "Protected LSA Scope: 3 Core Gateway / Submarine CLS & IXP Hubs (HOSP-*) + 20 District Backhaul / 5G Core & BharatNet PoPs (PDS-*) (23 nodes).";
+  document.getElementById("simulation-disclaimer").textContent =
+    "All telemetry, threat probabilities, and subscriber-impact ranges are synthetic and illustrative. Real deployment requires formal DoT / CERT-In authorization and a DPDP-compliant data-sharing agreement.";
 
   document.getElementById("kpi-critical").textContent = pad2(data.kpis.critical_alerts);
   document.getElementById("kpi-risk").textContent = pad2(data.kpis.services_at_risk);
@@ -50,8 +145,12 @@ function renderDashboard(data) {
   document.getElementById("kpi-investigated").textContent = pad2(data.kpis.incidents_investigated);
 
   populateInjectorSelect(data.alerts);
+  populateCampaignTargets(data.alerts);
   renderExtensionSectors(data.extension_sectors);
   renderAlertTable();
+  if (options.refreshAccessories !== false) {
+    loadAccessoriesState();
+  }
 
   if (!state.selectedId && data.alerts.length > 0) {
     selectAlert(data.alerts[0].institution.institution_id);
@@ -68,8 +167,9 @@ function populateInjectorSelect(alerts) {
     .sort((a, b) => a.institution.institution_id.localeCompare(b.institution.institution_id))
     .forEach((a) => {
       const opt = document.createElement("option");
+      const node = getTelecomNodeView(a.institution);
       opt.value = a.institution.institution_id;
-      opt.textContent = `${a.institution.institution_id} — ${a.institution.name}`;
+      opt.textContent = `${a.institution.institution_id} — ${node.name}`;
       sel.appendChild(opt);
     });
 }
@@ -102,22 +202,23 @@ function renderAlertTable() {
   tbody.innerHTML = filtered
     .map((a) => {
       const inst = a.institution;
+      const node = getTelecomNodeView(inst);
       const isSelected = state.selectedId === inst.institution_id;
       const rangeStr =
         a.impact.affected_citizens_high > 0
-          ? `${a.impact.affected_citizens_low}–${a.impact.affected_citizens_high} citizens`
+          ? `${a.impact.affected_citizens_low}–${a.impact.affected_citizens_high}k subscribers`
           : "Baseline (0 disrupted)";
       return `
         <tr data-inst-id="${escapeHtml(inst.institution_id)}" class="${isSelected ? "selected-row" : ""}">
           <td><strong>#${a.impact.priority_rank}</strong></td>
           <td><span class="level-badge level-${escapeHtml(a.level)}">${escapeHtml(a.level)}</span></td>
           <td>
-            <div><strong>${escapeHtml(inst.name)}</strong></div>
+            <div><strong>${escapeHtml(node.name)}</strong> <span class="node-tier-badge ${node.tierClass}">${escapeHtml(node.tier)}</span></div>
             <div class="inst-id">${escapeHtml(inst.institution_id)} &bull; ${escapeHtml(inst.zone)} &bull; Sev ${a.drift.severity.toFixed(2)}</div>
           </td>
           <td>
             <div><strong>${rangeStr}</strong></div>
-            <div class="inst-id">Score: ${a.impact.impact_score.toFixed(1)} (Illustrative)</div>
+            <div class="inst-id">UPI / 112 / e-Hospital &bull; Score: ${a.impact.impact_score.toFixed(1)} (Illustrative)</div>
           </td>
           <td><span class="inst-id">${escapeHtml(a.workflow.status)}</span></td>
         </tr>`;
@@ -150,6 +251,7 @@ async function selectAlert(institutionId) {
   }
 
   const inst = alert.institution;
+  const node = getTelecomNodeView(inst);
   const drift = alert.drift;
   const impact = alert.impact;
   const causes = alert.cause_probabilities;
@@ -157,16 +259,19 @@ async function selectAlert(institutionId) {
   const impactHeroHtml = `
     <div class="impact-hero">
       <div>
-        <div class="inst-id">ESTIMATED CITIZEN IMPACT RANGE (ILLUSTRATIVE)</div>
+        <div class="inst-id">ESTIMATED SUBSCRIBERS &amp; CRITICAL SERVICES AT RISK (ILLUSTRATIVE)</div>
         <div class="impact-range-num">
-          ${impact.affected_citizens_high > 0 ? `${impact.affected_citizens_low} – ${impact.affected_citizens_high} citizens` : "0 disrupted (Normal)"}
+          ${impact.affected_citizens_high > 0 ? `${impact.affected_citizens_low} – ${impact.affected_citizens_high}k subscribers` : "0 disrupted (Protected / Normal)"}
         </div>
-        <div class="muted-text">Impact Score: <strong>${impact.impact_score.toFixed(1)}</strong> &bull; Priority Rank <strong>#${impact.priority_rank}</strong></div>
+        <div class="muted-text">Blast-Radius Score: <strong>${impact.impact_score.toFixed(1)}</strong> &bull; Defense Priority <strong>#${impact.priority_rank}</strong></div>
+        <div class="critical-services-strip">
+          ${node.services.map((svc) => `<span class="service-pill">${escapeHtml(svc)}</span>`).join("")}
+        </div>
       </div>
       <div class="inst-id" style="text-align:right;">
-        Capacity: ${inst.service_capacity}/day<br/>
-        Footfall: ${inst.daily_footfall}/day<br/>
-        Vuln Weight: ${inst.vulnerability_weight}x
+        Link Cap: ${inst.service_capacity} Gbps eq.<br/>
+        Peak Traffic: ${inst.daily_footfall}k sess.<br/>
+        Criticality: ${inst.vulnerability_weight}x
       </div>
     </div>`;
 
@@ -205,13 +310,13 @@ async function selectAlert(institutionId) {
   }
 
   let playbookHtml = "";
-  if (alert.playbook) {
-    const pb = alert.playbook;
+  const pb = getTelecomPlaybookView(alert);
+  if (pb) {
     playbookHtml = `
       <div class="playbook-box ${pb.triggered ? "" : "standby"}">
         <strong>${pb.triggered ? "TRIGGERED:" : "STANDBY:"} ${escapeHtml(pb.title)}</strong>
-        <div class="inst-id">Route to: ${escapeHtml(pb.department)} &bull; Alternate: ${escapeHtml(pb.alternate_centre)}</div>
-        <ol>${pb.immediate_steps.map((st) => `<li>${escapeHtml(st)}</li>`).join("")}</ol>
+        <div class="inst-id">Route to: ${escapeHtml(pb.department)} &bull; Alternate Ring: ${escapeHtml(pb.alternate)}</div>
+        <ol>${pb.steps.map((st) => `<li>${escapeHtml(st)}</li>`).join("")}</ol>
       </div>`;
   }
 
@@ -243,23 +348,23 @@ async function selectAlert(institutionId) {
 
   document.getElementById("inspector-content").innerHTML = `
     <div>
-      <h3 style="margin:0 0 2px 0; color:var(--navy-900);">${escapeHtml(inst.name)}</h3>
-      <div class="inst-id">${escapeHtml(inst.institution_id)} &bull; ${escapeHtml(inst.responsible_department)}</div>
+      <h3 style="margin:0 0 2px 0; color:var(--navy-900);">${escapeHtml(node.name)} <span class="node-tier-badge ${node.tierClass}">${escapeHtml(node.tier)}</span></h3>
+      <div class="inst-id">${escapeHtml(inst.institution_id)} &bull; ${escapeHtml(node.dept)}</div>
     </div>
     ${impactHeroHtml}
     ${sparkHtml}
     <div class="detail-card">
-      <h4>DriftSentinel Explainability (Layer 2)</h4>
+      <h4>DriftSentinel Anomaly &amp; Attack Telemetry (Layer 2)</h4>
       <p class="muted-text">${escapeHtml(drift.summary)}</p>
       ${signalsHtml}
     </div>
     <div class="detail-card">
-      <h4>Probabilistic Cause Breakdown (Layer 3)</h4>
+      <h4>Probabilistic Threat &amp; Cause Attribution (Layer 3)</h4>
       ${causeHtml}
     </div>
     ${playbookHtml}
     <div class="detail-card">
-      <h4>Stated Impact Assumptions (Layer 4)</h4>
+      <h4>Blast-Radius &amp; Impact Assumptions (Layer 4)</h4>
       <ul>${impact.assumptions.map((as) => `<li>${escapeHtml(as)}</li>`).join("")}</ul>
     </div>
     ${workflowHtml}
@@ -409,7 +514,196 @@ function setupEventHandlers() {
   });
 
   document.getElementById("btn-refresh-eval").addEventListener("click", loadEvaluation);
+
+  document.getElementById("camp-intensity").addEventListener("input", (e) => {
+    document.getElementById("camp-intensity-val").textContent = e.target.value;
+  });
+
+  document.getElementById("btn-sel-hospitals").addEventListener("click", () => {
+    setCampaignTargetSelection(["HOSP-01", "HOSP-02", "HOSP-03"]);
+  });
+
+  document.getElementById("btn-sel-pds").addEventListener("click", () => {
+    setCampaignTargetSelection(["PDS-01", "PDS-03", "PDS-05"]);
+  });
+
+  document.getElementById("btn-sel-none").addEventListener("click", () => {
+    setCampaignTargetSelection([]);
+  });
+
+  document.getElementById("campaign-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const checked = Array.from(document.querySelectorAll(".camp-target-cb:checked")).map((cb) => cb.value);
+    if (checked.length === 0) {
+      alert("Select at least one target institution for the campaign.");
+      return;
+    }
+    const fault_type = document.getElementById("camp-fault").value;
+    const intensity = parseFloat(document.getElementById("camp-intensity").value);
+    const duration_ticks = parseInt(document.getElementById("camp-duration").value, 10) || 4;
+    const seed = parseInt(document.getElementById("camp-seed").value, 10) || 42;
+    const name = document.getElementById("camp-name").value.trim() || null;
+    const reset_before_run = document.getElementById("camp-reset-seed").checked;
+
+    const payload = {
+      name,
+      targets: checked.map((institution_id) => ({ institution_id, fault_type, intensity })),
+      duration_ticks,
+      seed,
+      reset_before_run,
+      step_immediately: 2,
+    };
+    const res = await apiFetch("/api/accessories/fault-injector/campaigns", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    state.selectedId = checked[0];
+    renderDashboard(res.dashboard, { refreshAccessories: false });
+    renderAccessoriesState(res.state);
+  });
+
+  document.getElementById("btn-clear-accessory").addEventListener("click", async () => {
+    const res = await apiFetch("/api/accessories/fault-injector/clear", { method: "POST" });
+    renderDashboard(res.dashboard, { refreshAccessories: false });
+    renderAccessoriesState(res.state);
+  });
 }
+
+function populateCampaignTargets(alerts) {
+  const grid = document.getElementById("camp-targets-grid");
+  if (!grid || grid.children.length > 0) return;
+  const sorted = alerts
+    .slice()
+    .sort((a, b) => a.institution.institution_id.localeCompare(b.institution.institution_id));
+  grid.innerHTML = sorted
+    .map((a) => {
+      const id = a.institution.institution_id;
+      return `
+        <label class="target-chip">
+          <input type="checkbox" class="camp-target-cb" value="${escapeHtml(id)}" />
+          <span><strong>${escapeHtml(id)}</strong> ${escapeHtml(a.institution.zone)}</span>
+        </label>`;
+    })
+    .join("");
+}
+
+function setCampaignTargetSelection(ids) {
+  const wanted = new Set(ids);
+  document.querySelectorAll(".camp-target-cb").forEach((cb) => {
+    cb.checked = wanted.has(cb.value);
+  });
+}
+
+async function loadAccessoriesState() {
+  try {
+    const accState = await apiFetch("/api/accessories/fault-injector");
+    renderAccessoriesState(accState);
+  } catch (err) {
+    console.error("Failed to load accessory state:", err);
+  }
+}
+
+async function launchPresetCampaign(presetId, defaultSeed, durationTicks) {
+  const res = await apiFetch("/api/accessories/fault-injector/campaigns", {
+    method: "POST",
+    body: JSON.stringify({
+      preset_id: presetId,
+      duration_ticks: durationTicks,
+      seed: defaultSeed,
+      reset_before_run: true,
+      step_immediately: 2,
+    }),
+  });
+  if (res.campaign?.ground_truth?.length > 0) {
+    state.selectedId = res.campaign.ground_truth[0].institution_id;
+  }
+  renderDashboard(res.dashboard, { refreshAccessories: false });
+  renderAccessoriesState(res.state);
+}
+
+function renderAccessoriesState(accState) {
+  if (!accState) return;
+  document.getElementById("acc-current-tick").textContent = accState.current_tick;
+
+  const badge = document.getElementById("acc-status-badge");
+  if (accState.status.active) {
+    badge.className = "level-badge level-Warning";
+    badge.textContent = `Active (${accState.status.active_items} slots)`;
+  } else {
+    badge.className = "level-badge level-Normal";
+    badge.textContent = "Idle";
+  }
+
+  const presetsBox = document.getElementById("accessory-presets-list");
+  const allPresets = [
+    ...(accState.telecom_presets || []).map((p) => ({ ...p, isTelecom: true })),
+    ...(accState.presets || []).map((p) => ({ ...p, isTelecom: false })),
+  ];
+  presetsBox.innerHTML = allPresets
+    .map(
+      (p) => `
+      <div class="preset-card ${p.isTelecom ? "telecom-featured" : ""}">
+        <div class="preset-head">
+          <div>
+            <strong>${escapeHtml(p.title)}</strong>
+            ${p.isTelecom ? '<span class="node-tier-badge tier-core">DoT / CERT-In Featured</span>' : ""}
+            <div class="inst-id">${escapeHtml(p.category)} &bull; ${p.recommended_duration_ticks} ticks &bull; Seed ${p.default_seed}</div>
+          </div>
+          <button type="button" class="btn ${p.isTelecom ? "btn-primary" : "btn-secondary"}" onclick="launchPresetCampaign('${escapeHtml(p.preset_id)}', ${p.default_seed}, ${p.recommended_duration_ticks})">
+            Launch Preset
+          </button>
+        </div>
+        <p class="muted-text" style="margin-top:6px;">${escapeHtml(p.description)}</p>
+        <div class="inst-id" style="margin-top:4px;">${escapeHtml(p.ground_truth_summary)}</div>
+      </div>`
+    )
+    .join("");
+
+  const activeBody = document.getElementById("acc-active-body");
+  if (accState.active_injections.length === 0) {
+    activeBody.innerHTML = `<tr><td colspan="7" class="muted-text">No timed accessory injections active.</td></tr>`;
+  } else {
+    activeBody.innerHTML = accState.active_injections
+      .map(
+        (inj) => `
+        <tr>
+          <td><strong>${escapeHtml(inj.campaign_name)}</strong><div class="inst-id">${escapeHtml(inj.campaign_id)}</div></td>
+          <td><strong>${escapeHtml(inj.institution_id)}</strong></td>
+          <td><code>${escapeHtml(inj.fault_type)}</code> (${inj.intensity}x)</td>
+          <td>${escapeHtml(CAUSE_LABELS[inj.expected_cause] || inj.expected_cause || "N/A")}</td>
+          <td><span class="inst-id">${inj.starts_at_tick} .. ${inj.ends_at_tick}</span></td>
+          <td><strong>${inj.remaining_ticks}</strong> ticks</td>
+          <td><span class="level-badge ${inj.active_now ? "level-Critical" : "level-Warning"}">${inj.active_now ? "ACTIVE" : "SCHEDULED"}</span></td>
+        </tr>`
+      )
+      .join("");
+  }
+
+  const histBox = document.getElementById("acc-history-list");
+  if (accState.campaign_history.length === 0) {
+    histBox.innerHTML = `<p class="muted-text">No accessory campaigns launched yet.</p>`;
+  } else {
+    histBox.innerHTML = accState.campaign_history
+      .map(
+        (c) => `
+        <div class="ext-item">
+          <strong>${escapeHtml(c.name)}</strong>
+          <span class="inst-id">(${escapeHtml(c.campaign_id)} &bull; Seed ${c.seed} &bull; Ticks ${c.started_at_tick}..${c.ends_at_tick})</span>
+          <div class="muted-text" style="margin-top:4px;">
+            Ground Truth: ${c.ground_truth
+              .map(
+                (gt) =>
+                  `${escapeHtml(gt.institution_id)}: ${escapeHtml(gt.fault_type)} -> ${escapeHtml(gt.expected_cause || "none")} [${gt.start_tick}..${gt.end_tick}]`
+              )
+              .join(" | ")}
+          </div>
+        </div>`
+      )
+      .join("");
+  }
+}
+
+window.launchPresetCampaign = launchPresetCampaign;
 
 window.submitWorkflow = submitWorkflow;
 

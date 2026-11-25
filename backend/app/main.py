@@ -14,8 +14,15 @@ from backend.nexa_engine import (
     DriftSentinel,
     EXTENSION_SECTORS,
     PlaybookEngine,
+    SyntheticFaultInjectorAccessory,
     TelemetrySimulator,
+    TelemetrySource,
     VULNERABILITY_PROXY_TABLE,
+)
+from backend.nexa_engine.accessories import (
+    AccessoryStatus,
+    FaultCampaignRequest,
+    FaultInjectorState,
 )
 from backend.nexa_engine.evaluation import run_full_evaluation
 from backend.nexa_engine.models import (
@@ -23,6 +30,7 @@ from backend.nexa_engine.models import (
     CivicAlert,
     DashboardSummary,
     FaultType,
+    TelemetryIngestBatch,
     TelemetryPoint,
     WorkflowStatus,
 )
@@ -46,20 +54,24 @@ class WorkflowUpdateRequest(BaseModel):
 class CivicSentinelService:
     """Orchestrates the 5-layer NEXA ENGINE pipeline over the active simulation."""
 
-    def __init__(self, seed: int = 42):
+    def __init__(self, seed: int = 42, telemetry_source: Optional[TelemetrySource] = None):
         self.simulator = TelemetrySimulator(seed=seed, history_ticks=40)
+        self.telemetry_source: TelemetrySource = telemetry_source or self.simulator
         self.drift_sentinel = DriftSentinel(baseline_window=30, z_threshold=2.6)
         self.cause_classifier = CauseClassifier(seed=101)
         self.impact_engine = CitizenImpactEngine()
         self.playbook_engine = PlaybookEngine()
+        self.fault_injector = SyntheticFaultInjectorAccessory()
         self._cached_evaluation: Optional[Dict[str, object]] = None
 
     def build_dashboard(self) -> DashboardSummary:
-        drift_items = []
-        for inst_id, inst in self.simulator.institutions.items():
-            history = self.simulator.series[inst_id]
-            drift = self.drift_sentinel.evaluate(inst, history)
-            drift_items.append((inst, drift))
+        batch = self.telemetry_source.collect_batch()
+        drift_results = self.drift_sentinel.evaluate_batch(
+            batch,
+            reference_tick=self.telemetry_source.current_tick,
+            reference_time=self.telemetry_source.reference_time,
+        )
+        drift_items = [(inst, drift) for (inst, _), drift in zip(batch, drift_results)]
 
         ranked = self.impact_engine.assess_and_rank(drift_items)
 
@@ -69,14 +81,22 @@ class CivicSentinelService:
         investigated_count = 0
 
         for inst, drift, impact, level in ranked:
-            latest_pt = self.simulator.series[inst.institution_id][-1]
+            latest_pt = self.telemetry_source.get_latest(inst.institution_id)
+            assert latest_pt is not None
             alert_id = f"ALT-{inst.institution_id}"
+            # Do not run crash/attack cause classification on stale/silent heartbeats
             cause_probs = (
                 self.cause_classifier.predict_proba(inst, latest_pt)
-                if drift.is_anomalous
+                if drift.is_anomalous and not drift.is_stale
                 else None
             )
-            playbook = self.playbook_engine.build_playbook(inst, level)
+            playbook = self.playbook_engine.build_playbook(
+                inst,
+                level,
+                alert_id=alert_id,
+                severity=drift.severity,
+                current_tick=self.telemetry_source.current_tick,
+            )
             workflow = self.playbook_engine.get_workflow(alert_id)
 
             if level == AlertLevel.CRITICAL:
@@ -123,6 +143,7 @@ class CivicSentinelService:
         """Section 12 scripted demo: normal -> hospital registration failure -> warning ration centre -> playbook."""
         self.simulator.reset(seed=42)
         self.playbook_engine.reset()
+        self.fault_injector.reset()
         self.simulator.inject_fault("HOSP-01", FaultType.REQUEST_SPIKE, intensity=1.15)
         self.simulator.inject_fault("PDS-03", FaultType.AUTH_FAILURE_STORM, intensity=0.65)
         self.simulator.step(2)
@@ -192,7 +213,7 @@ def inject_fault(req: FaultInjectionRequest) -> DashboardSummary:
 
 @app.post("/api/demo/step", response_model=DashboardSummary)
 def advance_simulation(steps: int = 1) -> DashboardSummary:
-    service.simulator.step(max(1, min(steps, 10)))
+    service.fault_injector.step_with_simulator(service.simulator, max(1, min(steps, 10)))
     return service.build_dashboard()
 
 
@@ -200,28 +221,87 @@ def advance_simulation(steps: int = 1) -> DashboardSummary:
 def reset_simulation() -> DashboardSummary:
     service.simulator.reset(seed=42)
     service.playbook_engine.reset()
+    service.fault_injector.reset()
     return service.build_dashboard()
 
 
 @app.post("/api/alerts/{alert_id}/workflow")
 def update_alert_workflow(alert_id: str, req: WorkflowUpdateRequest) -> Dict[str, object]:
-    valid_ids = {f"ALT-{inst_id}" for inst_id in service.simulator.institutions}
+    valid_ids = {f"ALT-{inst_id}" for inst_id in service.telemetry_source.institutions}
     if alert_id not in valid_ids:
         raise HTTPException(status_code=404, detail="Alert ID not found.")
+
+    inst_id = alert_id.replace("ALT-", "", 1)
+    inst = service.telemetry_source.institutions[inst_id]
+    history = service.telemetry_source.get_history(inst_id)
+    curr_drift = service.drift_sentinel.evaluate(
+        inst,
+        history,
+        reference_tick=service.telemetry_source.current_tick,
+        reference_time=service.telemetry_source.reference_time,
+    )
+    curr_sev = curr_drift.severity if curr_drift.is_anomalous else 0.0
+    curr_score = service.impact_engine.compute_raw_impact(inst, curr_sev)
+    curr_level = service.impact_engine.classify_alert_level(curr_drift, curr_score)
 
     state = service.playbook_engine.update_workflow(
         alert_id=alert_id,
         status=req.status,
         official_name=req.official_name,
         notes=req.notes,
+        current_tick=service.telemetry_source.current_tick,
+        severity=curr_drift.severity,
+        level=curr_level,
     )
     # If marked Restored, clear active simulated fault on that institution to reflect restoration
     if req.status == WorkflowStatus.RESTORED:
-        inst_id = alert_id.replace("ALT-", "", 1)
+        service.fault_injector.clear_institution(inst_id, service.simulator)
         service.simulator.clear_fault(inst_id)
-        service.simulator.step(2)
+        service.fault_injector.step_with_simulator(service.simulator, 2)
 
     return {"alert_id": alert_id, "workflow": state, "dashboard": service.build_dashboard()}
+
+
+@app.post("/api/telemetry/ingest")
+def validate_telemetry_ingest(batch: TelemetryIngestBatch) -> Dict[str, object]:
+    """Validate strict zero-PII aggregate telemetry batches (extra='forbid' boundary)."""
+    return {
+        "accepted": len(batch.points),
+        "source_id": batch.source_id,
+        "zero_pii_validated": True,
+    }
+
+
+@app.get("/api/accessories", response_model=List[AccessoryStatus])
+def list_accessories() -> List[AccessoryStatus]:
+    return [service.fault_injector.status()]
+
+
+@app.get("/api/accessories/fault-injector", response_model=FaultInjectorState)
+def get_fault_injector_state() -> FaultInjectorState:
+    return service.fault_injector.get_state(service.simulator)
+
+
+@app.post("/api/accessories/fault-injector/campaigns")
+def launch_fault_campaign(req: FaultCampaignRequest) -> Dict[str, object]:
+    try:
+        campaign = service.fault_injector.launch_campaign(service.simulator, req)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {
+        "campaign": campaign,
+        "state": service.fault_injector.get_state(service.simulator),
+        "dashboard": service.build_dashboard(),
+    }
+
+
+@app.post("/api/accessories/fault-injector/clear")
+def clear_fault_campaigns() -> Dict[str, object]:
+    service.fault_injector.clear_all(service.simulator)
+    return {
+        "state": service.fault_injector.get_state(service.simulator),
+        "dashboard": service.build_dashboard(),
+    }
 
 
 @app.get("/api/evaluation")

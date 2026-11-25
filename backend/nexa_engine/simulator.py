@@ -14,23 +14,48 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 import numpy as np
 
+from .ingestion import TelemetrySource
 from .institutions import CORE_INSTITUTIONS
 from .models import FaultType, InstitutionProfile, TelemetryPoint
 
 
-class TelemetrySimulator:
+class TelemetrySimulator(TelemetrySource):
     def __init__(self, seed: int = 42, history_ticks: int = 40):
         self.seed = seed
         self.rng = np.random.default_rng(seed)
         self.history_ticks = history_ticks
-        self.institutions: Dict[str, InstitutionProfile] = {
+        self._institutions: Dict[str, InstitutionProfile] = {
             inst.institution_id: inst for inst in CORE_INSTITUTIONS
         }
         self.active_faults: Dict[str, Tuple[FaultType, float]] = {}
         self.series: Dict[str, List[TelemetryPoint]] = {}
-        self.current_tick = 0
+        self._current_tick = 0
         self.base_time = datetime(2026, 11, 25, 9, 0, 0, tzinfo=timezone.utc)
         self.reset(seed=seed)
+
+    @property
+    def institutions(self) -> Dict[str, InstitutionProfile]:
+        return self._institutions
+
+    @property
+    def current_tick(self) -> int:
+        return self._current_tick
+
+    @current_tick.setter
+    def current_tick(self, value: int) -> None:
+        self._current_tick = value
+
+    @property
+    def reference_time(self) -> datetime:
+        return self.base_time + timedelta(minutes=5 * self._current_tick)
+
+    def get_history(self, institution_id: str, limit: Optional[int] = None) -> List[TelemetryPoint]:
+        pts = self.series[institution_id]
+        return pts[-limit:] if limit is not None else pts
+
+    def get_latest(self, institution_id: str) -> Optional[TelemetryPoint]:
+        pts = self.series.get(institution_id, [])
+        return pts[-1] if pts else None
 
     def reset(self, seed: Optional[int] = None) -> None:
         if seed is not None:
